@@ -83,6 +83,37 @@ You help students learn biology through:
 Be encouraging, patient, and make learning fun!`;
     }
 
+    // Generate image if explaining
+    let imageUrl = null;
+    if (lowerMessage.includes("explain") || lowerMessage.includes("what is") || lowerMessage.includes("tell me about")) {
+      try {
+        const imageResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash-image-preview",
+            messages: [
+              {
+                role: "user",
+                content: `Generate an educational diagram or illustration for: ${topic}. Make it clear, scientific, and suitable for biology students.`,
+              },
+            ],
+            modalities: ["image", "text"],
+          }),
+        });
+
+        if (imageResponse.ok) {
+          const imageData = await imageResponse.json();
+          imageUrl = imageData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+        }
+      } catch (error) {
+        console.error("Image generation error:", error);
+      }
+    }
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -127,7 +158,7 @@ Be encouraging, patient, and make learning fun!`;
     }
 
     return new Response(
-      JSON.stringify({ response: aiResponse }),
+      JSON.stringify({ response: aiResponse, image: imageUrl }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: any) {

@@ -12,6 +12,7 @@ interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  image?: string;
   created_at: string;
 }
 
@@ -121,6 +122,7 @@ const Chat = () => {
         id: crypto.randomUUID(),
         role: "assistant",
         content: data.response,
+        image: data.image,
         created_at: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, aiMessage]);
@@ -198,6 +200,13 @@ const Chat = () => {
                     : "bg-card border-border/50 shadow-soft"
                 }`}
               >
+                {message.image && (
+                  <img 
+                    src={message.image} 
+                    alt="Topic illustration" 
+                    className="w-full rounded-lg mb-3 shadow-soft"
+                  />
+                )}
                 <p className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</p>
               </Card>
             </div>
