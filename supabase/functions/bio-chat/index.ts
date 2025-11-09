@@ -86,6 +86,7 @@ Be encouraging, patient, and make learning fun!`;
     // Generate image if explaining
     let imageUrl = null;
     if (lowerMessage.includes("explain") || lowerMessage.includes("what is") || lowerMessage.includes("tell me about")) {
+      console.log("Attempting to generate image for topic:", topic);
       try {
         const imageResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
@@ -105,9 +106,16 @@ Be encouraging, patient, and make learning fun!`;
           }),
         });
 
+        console.log("Image API response status:", imageResponse.status);
+        
         if (imageResponse.ok) {
           const imageData = await imageResponse.json();
+          console.log("Image data received:", JSON.stringify(imageData).substring(0, 200));
           imageUrl = imageData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+          console.log("Extracted image URL:", imageUrl ? "Yes (base64)" : "No");
+        } else {
+          const errorText = await imageResponse.text();
+          console.error("Image generation failed:", imageResponse.status, errorText);
         }
       } catch (error) {
         console.error("Image generation error:", error);
